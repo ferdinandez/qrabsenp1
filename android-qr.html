@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code untuk Android - AttendX</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            color: #00BFFF;
+            margin-bottom: 10px;
+        }
+
+        #qrcode {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            display: inline-block;
+            margin: 30px 0;
+            box-shadow: 0 10px 40px rgba(0, 102, 255, 0.3);
+        }
+
+        .ip-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 1.2em;
+        }
+
+        .url-display {
+            background: rgba(0, 102, 255, 0.2);
+            border: 2px solid #0066FF;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            word-break: break-all;
+            font-family: monospace;
+        }
+
+        button {
+            background: linear-gradient(135deg, #0066FF, #0052CC);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        .instructions {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .instructions h3 {
+            color: #ffc107;
+            margin-top: 0;
+        }
+
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>📱 Scan QR Code untuk Install PWA</h1>
+        <p>Scan QR code ini dari Chrome Android untuk langsung install AttendX</p>
+
+        <div class="ip-display">
+            <strong>IP Address PC:</strong><br>
+            <span id="ipAddress" style="color: #00BFFF; font-size: 1.5em;">Detecting...</span>
+        </div>
+
+        <div class="url-display" id="urlDisplay">
+            Generating URL...
+        </div>
+
+        <div id="qrcode"></div>
+
+        <button onclick="generateQR()">🔄 Regenerate QR Code</button>
+        <button onclick="downloadQR()">💾 Download QR Code</button>
+
+        <div class="instructions">
+            <h3>📋 Cara Pakai:</h3>
+            <div class="step">
+                <strong>1.</strong> Buka <strong>Camera</strong> atau <strong>Chrome</strong> di Android
+            </div>
+            <div class="step">
+                <strong>2.</strong> Scan QR code di atas
+            </div>
+            <div class="step">
+                <strong>3.</strong> Tap notifikasi untuk buka link
+            </div>
+            <div class="step">
+                <strong>4.</strong> Tunggu banner install muncul
+            </div>
+            <div class="step">
+                <strong>5.</strong> Tap <strong>"Add to Home Screen"</strong>
+            </div>
+            <div class="step">
+                <strong>6.</strong> Done! Icon AttendX muncul di home screen 🎉
+            </div>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <a href="pwa-android.html" style="color: #0066FF; text-decoration: none; margin: 0 10px;">
+                📖 Full Android Guide
+            </a>
+            |
+            <a href="dashboard.php" style="color: #0066FF; text-decoration: none; margin: 0 10px;">
+                🏠 Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <script>
+        let ipAddress = '';
+        let fullUrl = '';
+        let qrcodeInstance = null;
+
+        async function detectIP() {
+            const ipDiv = document.getElementById('ipAddress');
+            const urlDiv = document.getElementById('urlDisplay');
+
+            try {
+                // Method 1: WebRTC
+                const pc = new RTCPeerConnection({ iceServers: [] });
+                pc.createDataChannel('');
+
+                const offer = await pc.createOffer();
+                await pc.setLocalDescription(offer);
+
+                pc.onicecandidate = (ice) => {
+                    if (!ice || !ice.candidate || !ice.candidate.candidate) return;
+
+                    const parts = ice.candidate.candidate.split(' ');
+                    const ip = parts[4];
+
+                    // Check if local network IP
+                    if (ip && ip.match(/^192\.168\.|^10\.|^172\.(1[6-9]|2[0-9]|3[01])\./)) {
+                        ipAddress = ip;
+                        fullUrl = `http://${ip}/AbsensiQR/qrabsenp1/dashboard.php`;
+
+                        ipDiv.textContent = ip;
+                        urlDiv.textContent = fullUrl;
+
+                        generateQR();
+                        pc.close();
+                    }
+                };
+
+                // Fallback setelah 3 detik
+                setTimeout(() => {
+                    if (!ipAddress) {
+                        // Gunakan window.location sebagai fallback
+                        const hostname = window.location.hostname;
+                        if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+                            ipAddress = hostname;
+                            fullUrl = `http://${hostname}/AbsensiQR/qrabsenp1/dashboard.php`;
+                        } else {
+                            ipAddress = 'localhost';
+                            fullUrl = 'http://localhost/AbsensiQR/qrabsenp1/dashboard.php';
+                        }
+
+                        ipDiv.textContent = ipAddress;
+                        urlDiv.innerHTML = `
+                            <strong>⚠️ Auto-detect gagal</strong><br>
+                            <small>Cek IP manual dengan <code>ipconfig</code> di CMD</small><br>
+                            Sementara menggunakan: ${fullUrl}
+                        `;
+
+                        generateQR();
+                    }
+                }, 3000);
+
+            } catch (e) {
+                console.error('IP detection failed:', e);
+
+                // Ultimate fallback
+                ipAddress = window.location.hostname || 'localhost';
+                fullUrl = window.location.origin + '/AbsensiQR/qrabsenp1/dashboard.php';
+
+                ipDiv.textContent = ipAddress;
+                urlDiv.textContent = fullUrl;
+
+                generateQR();
+            }
+        }
+
+        function generateQR() {
+            const qrDiv = document.getElementById('qrcode');
+
+            // Clear previous QR code
+            qrDiv.innerHTML = '';
+
+            if (!fullUrl) {
+                qrDiv.innerHTML = '<p style="color: #000; padding: 20px;">Waiting for URL...</p>';
+                return;
+            }
+
+            // Generate new QR code
+            qrcodeInstance = new QRCode(qrDiv, {
+                text: fullUrl,
+                width: 300,
+                height: 300,
+                colorDark: "#0a0e27",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        function downloadQR() {
+            if (!qrcodeInstance) {
+                alert('QR Code belum di-generate!');
+                return;
+            }
+
+            const canvas = document.querySelector('#qrcode canvas');
+            if (canvas) {
+                const link = document.createElement('a');
+                link.download = 'attendx-qr-code.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            } else {
+                // Fallback untuk img
+                const img = document.querySelector('#qrcode img');
+                if (img) {
+                    const link = document.createElement('a');
+                    link.download = 'attendx-qr-code.png';
+                    link.href = img.src;
+                    link.click();
+                }
+            }
+        }
+
+        // Auto-detect on load
+        window.addEventListener('load', detectIP);
+    </script>
+</body>
+
+</html>

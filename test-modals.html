@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Modal Alerts - AttendX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-8">
+    <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-2xl w-full">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-black text-gray-900 mb-2">
+                Attend<span style="color: #0066FF;">X</span>
+            </h1>
+            <p class="text-gray-600">Test Modal Alert System</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <!-- Success -->
+            <button onclick="testSuccess()" class="p-6 bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-2xl hover:shadow-lg transition transform hover:scale-105">
+                <i class="fas fa-check-circle text-4xl mb-3"></i>
+                <h3 class="font-bold text-lg">Success Alert</h3>
+                <p class="text-sm text-white text-opacity-80">Auto close 3 detik</p>
+            </button>
+
+            <!-- Error -->
+            <button onclick="testError()" class="p-6 bg-gradient-to-br from-red-500 to-rose-600 text-white rounded-2xl hover:shadow-lg transition transform hover:scale-105">
+                <i class="fas fa-times-circle text-4xl mb-3"></i>
+                <h3 class="font-bold text-lg">Error Alert</h3>
+                <p class="text-sm text-white text-opacity-80">Manual close</p>
+            </button>
+
+            <!-- Warning -->
+            <button onclick="testWarning()" class="p-6 bg-gradient-to-br from-amber-500 to-orange-600 text-white rounded-2xl hover:shadow-lg transition transform hover:scale-105">
+                <i class="fas fa-exclamation-triangle text-4xl mb-3"></i>
+                <h3 class="font-bold text-lg">Warning Alert</h3>
+                <p class="text-sm text-white text-opacity-80">Manual close</p>
+            </button>
+
+            <!-- Info -->
+            <button onclick="testInfo()" class="p-6 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-2xl hover:shadow-lg transition transform hover:scale-105">
+                <i class="fas fa-info-circle text-4xl mb-3"></i>
+                <h3 class="font-bold text-lg">Info Alert</h3>
+                <p class="text-sm text-white text-opacity-80">Manual close</p>
+            </button>
+        </div>
+
+        <!-- Special Actions -->
+        <div class="space-y-3">
+            <button onclick="testLogout()" class="w-full p-4 bg-gradient-to-br from-purple-500 to-violet-600 text-white rounded-xl hover:shadow-lg transition transform hover:scale-[1.02] font-bold">
+                <i class="fas fa-question-circle mr-2"></i>
+                Test Logout Confirmation
+            </button>
+
+            <button onclick="testDelete()" class="w-full p-4 bg-gradient-to-br from-red-600 to-pink-600 text-white rounded-xl hover:shadow-lg transition transform hover:scale-[1.02] font-bold">
+                <i class="fas fa-trash-alt mr-2"></i>
+                Test Delete Confirmation
+            </button>
+        </div>
+
+        <!-- Console Log -->
+        <div class="mt-8 p-4 bg-gray-900 rounded-xl">
+            <div class="flex items-center justify-between mb-2">
+                <h4 class="text-white font-bold text-sm">Console Output:</h4>
+                <button onclick="clearLog()" class="text-xs text-gray-400 hover:text-white">Clear</button>
+            </div>
+            <div id="console" class="text-green-400 text-xs font-mono space-y-1 max-h-32 overflow-y-auto">
+                <div>> Ready to test modals...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/modal-alert.js"></script>
+    <script>
+        function log(message) {
+            const console = document.getElementById('console');
+            const time = new Date().toLocaleTimeString();
+            console.innerHTML += `<div>> [${time}] ${message}</div>`;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('console').innerHTML = '<div>> Console cleared...</div>';
+        }
+
+        function testSuccess() {
+            log('Testing SUCCESS alert...');
+            ModalAlert.success('Data berhasil disimpan ke database!', 'Berhasil!');
+            log('✓ Success modal shown (auto close in 3s)');
+        }
+
+        function testError() {
+            log('Testing ERROR alert...');
+            ModalAlert.error('Gagal menyimpan data. Email sudah terdaftar!', 'Error!');
+            log('✗ Error modal shown');
+        }
+
+        function testWarning() {
+            log('Testing WARNING alert...');
+            ModalAlert.warning('Password Anda akan expired dalam 3 hari. Segera ganti password!', 'Peringatan!');
+            log('⚠ Warning modal shown');
+        }
+
+        function testInfo() {
+            log('Testing INFO alert...');
+            ModalAlert.info('Server akan maintenance pada tanggal 15 Juli 2026 pukul 23:00 WIB.', 'Informasi');
+            log('ℹ Info modal shown');
+        }
+
+        function testLogout() {
+            log('Testing LOGOUT confirmation...');
+            ModalAlert.confirm(
+                'Apakah Anda yakin ingin keluar dari sistem?',
+                () => {
+                    log('✓ User CONFIRMED logout');
+                    ModalAlert.success('Logout berhasil! Redirecting...', 'Goodbye!');
+                },
+                () => {
+                    log('✗ User CANCELLED logout');
+                },
+                'Konfirmasi Logout'
+            );
+            log('? Logout confirmation shown');
+        }
+
+        function testDelete() {
+            log('Testing DELETE confirmation...');
+            ModalAlert.confirm(
+                'Apakah Anda yakin ingin menghapus pegawai ini? Data yang sudah dihapus tidak dapat dikembalikan.',
+                () => {
+                    log('✓ User CONFIRMED delete');
+                    ModalAlert.success('Pegawai berhasil dihapus!');
+                },
+                () => {
+                    log('✗ User CANCELLED delete');
+                },
+                'Hapus Pegawai?'
+            );
+            log('? Delete confirmation shown');
+        }
+
+        // Log initial load
+        log('Modal Alert System loaded successfully');
+        log('Click any button to test modals');
+    </script>
+</body>
+</html>

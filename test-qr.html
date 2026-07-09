@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test QR Generation</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <h1>Test QR Code Generation</h1>
+    <div id="qrcode" style="margin: 20px;"></div>
+    <button onclick="testQR()">Generate Test QR</button>
+    
+    <script>
+        function testQR() {
+            // Test 1: Check if QRCode library is loaded
+            console.log('QRCode library loaded:', typeof QRCode !== 'undefined');
+            
+            if (typeof QRCode === 'undefined') {
+                alert('QRCode library GAGAL dimuat!');
+                return;
+            }
+            
+            // Test 2: Generate simple QR
+            document.getElementById('qrcode').innerHTML = '';
+            try {
+                new QRCode(document.getElementById('qrcode'), {
+                    text: JSON.stringify({ token: 'test-token-12345' }),
+                    width: 300,
+                    height: 300,
+                    colorDark: '#0066FF',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                console.log('QR generated successfully!');
+                alert('QR berhasil di-generate! Library bekerja dengan baik.');
+            } catch (error) {
+                console.error('Error generating QR:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        // Auto test on load
+        window.onload = function() {
+            console.log('Page loaded');
+            testQR();
+        };
+    </script>
+</body>
+</html>
