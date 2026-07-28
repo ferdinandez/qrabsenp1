@@ -95,14 +95,9 @@ class UserController extends Controller
             ['user_id' => $user->id]
         );
         
-        // Return response first, then send email asynchronously
-        $response = response()->json([
-            'message' => 'User berhasil ditambahkan',
-            'data'    => $user->only(['id', 'name', 'email', 'role', 'status', 'department', 'position', 'phone']),
-            'default_password' => $password === 'password123' ? 'password123' : null,
-        ], 201);
-        
-        // Send email after response (non-blocking)
+        // Email notification - DISABLED TEMPORARILY FOR PERFORMANCE
+        // TODO: Implement queue worker for background email sending
+        /*
         register_shutdown_function(function() use ($user, $password) {
             try {
                 \Illuminate\Support\Facades\Mail::to($user->email)
@@ -111,8 +106,13 @@ class UserController extends Controller
                 \Log::error('Failed to send email: ' . $e->getMessage());
             }
         });
-        
-        return $response;
+        */
+
+        return response()->json([
+            'message' => 'User berhasil ditambahkan',
+            'data'    => $user->only(['id', 'name', 'email', 'role', 'status', 'department', 'position', 'phone']),
+            'default_password' => $password === 'password123' ? 'password123' : null,
+        ], 201);
     }
 
     // PUT /api/users/{id} — edit karyawan
