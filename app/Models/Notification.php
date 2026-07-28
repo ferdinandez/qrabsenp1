@@ -4,20 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Absensi extends Model
+class Notification extends Model
 {
     protected $fillable = [
         'user_id',
         'type',
-        'waktu',
-        'latitude',
-        'longitude',
+        'title',
+        'message',
+        'data',
+        'is_read'
     ];
 
     protected $casts = [
-        'waktu' => 'datetime',
-        'latitude' => 'float',
-        'longitude' => 'float',
+        'data' => 'array',
+        'is_read' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function user()

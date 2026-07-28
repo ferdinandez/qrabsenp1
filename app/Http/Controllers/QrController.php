@@ -60,6 +60,31 @@ class QrController extends Controller
             return response()->json(['message' => 'QR sudah kadaluarsa'], 400);
         }
 
+        // Check today's attendance
+        $today = \Carbon\Carbon::now('Asia/Jakarta')->startOfDay();
+        $todayEnd = \Carbon\Carbon::now('Asia/Jakarta')->endOfDay();
+        
+        $user = $req->user();
+        
+        $absenMasuk = Absensi::where('user_id', $user->id)
+            ->where('type', 'masuk')
+            ->whereBetween('waktu', [$today, $todayEnd])
+            ->first();
+        
+        $absenPulang = Absensi::where('user_id', $user->id)
+            ->where('type', 'pulang')
+            ->whereBetween('waktu', [$today, $todayEnd])
+            ->first();
+
+        // Determine attendance type
+        if (!$absenMasuk) {
+            $type = 'masuk';
+        } elseif (!$absenPulang) {
+            $type = 'pulang';
+        } else {
+            return response()->json(['message' => 'Anda sudah absen masuk dan pulang hari ini'], 400);
+        }
+
         // Cek lokasi
         $kantor_lat = -6.8773288;
         $kantor_lon = 107.5758885;
@@ -69,20 +94,27 @@ class QrController extends Controller
             return response()->json(['message' => 'Diluar area kantor!'], 403);
         }
 
-        // Tandai QR sudah dipakai
-        $qr->update(['is_used' => true]);
+        // Tandai QR sudah dipakai (hanya untuk absen masuk)
+        if ($type === 'masuk') {
+            $qr->update(['is_used' => true]);
+        }
 
-        // Simpan absensi
+        // Simpan absensi dengan server time Asia/Jakarta
+        $waktuAbsen = \Carbon\Carbon::now('Asia/Jakarta');
+        
         $absen = Absensi::create([
-            'user_id'   => $req->user()->id,
-            'waktu'     => now(),
+            'user_id'   => $user->id,
+            'type'      => $type,
+            'waktu'     => $waktuAbsen,
             'latitude'  => $req->latitude,
             'longitude' => $req->longitude,
         ]);
 
         return response()->json([
-            'message' => 'Absensi berhasil via QR',
+            'message' => 'Absen ' . $type . ' berhasil via QR',
+            'type' => $type,
             'data'    => $absen,
+            'server_time' => $waktuAbsen->toDateTimeString()
         ]);
     }
 

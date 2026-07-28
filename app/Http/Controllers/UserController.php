@@ -95,20 +95,24 @@ class UserController extends Controller
             ['user_id' => $user->id]
         );
         
-        // Email notification - send in background to avoid timeout
-        try {
-            \Illuminate\Support\Facades\Mail::to($user->email)
-                ->queue(new \App\Mail\WelcomeUserMail($user, $password));
-        } catch (\Exception $e) {
-            \Log::error('Failed to queue email: ' . $e->getMessage());
-            // Don't fail the request if email fails
-        }
-
-        return response()->json([
+        // Return response first, then send email asynchronously
+        $response = response()->json([
             'message' => 'User berhasil ditambahkan',
             'data'    => $user->only(['id', 'name', 'email', 'role', 'status', 'department', 'position', 'phone']),
             'default_password' => $password === 'password123' ? 'password123' : null,
         ], 201);
+        
+        // Send email after response (non-blocking)
+        register_shutdown_function(function() use ($user, $password) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($user->email)
+                    ->send(new \App\Mail\WelcomeUserMail($user, $password));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send email: ' . $e->getMessage());
+            }
+        });
+        
+        return $response;
     }
 
     // PUT /api/users/{id} — edit karyawan
