@@ -7,14 +7,30 @@ use App\Http\Controllers\QrController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\SettingsController;
+use Illuminate\Support\Facades\DB;
+
+// Root API endpoint
+Route::get('/', function() {
+    return response()->json([
+        'message' => 'AttendX API is running',
+        'version' => '1.0',
+        'timestamp' => now()->toISOString()
+    ]);
+});
 
 // Health check endpoint - untuk test deployment
 Route::get('/health', function() {
+    try {
+        $dbConnected = DB::connection()->getPdo() ? 'connected' : 'disconnected';
+    } catch (\Exception $e) {
+        $dbConnected = 'error: ' . $e->getMessage();
+    }
+    
     return response()->json([
         'status' => 'ok',
         'message' => 'API is running',
         'timestamp' => now()->toISOString(),
-        'database' => DB::connection()->getPdo() ? 'connected' : 'disconnected'
+        'database' => $dbConnected
     ]);
 });
 

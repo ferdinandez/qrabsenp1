@@ -1,36 +1,34 @@
-# Use PHP 8.2 with Apache
 FROM php:8.2-cli
 
-# Install system dependencies
+# Install dependencies
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
     libpq-dev \
     libzip-dev \
     zip \
-    unzip
-
-# Install PHP extensions
-RUN docker-php-ext-install pdo pdo_pgsql zip
+    && docker-php-ext-install pdo pdo_pgsql zip \
+    && apt-get clean
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
 WORKDIR /app
 
-# Copy application files
+# Copy files
 COPY . .
 
-# Install dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Install PHP dependencies
+RUN composer install --no-dev --no-interaction --optimize-autoloader
 
-# Cache Laravel - skip if env not ready
-RUN php artisan config:clear || true
+# Create storage link and set permissions
+RUN php artisan storage:link || true && \
+    chmod -R 777 storage bootstrap/cache
 
-# Expose port
 EXPOSE 8080
 
-# Start Laravel - temporarily without migration to debug
-# Use explicit port 8080 for Render
-CMD php artisan serve --host=0.0.0.0 --port=8080
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=60s \
+    CMD php -r "echo 'OK';" || exit 1
+
+# Start server (no migration for now)
+CMD php artisan config:clear && \
+    php artisan serve --host=0.0.0.0 --port=8080
