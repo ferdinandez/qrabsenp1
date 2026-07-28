@@ -23,12 +23,12 @@ RUN composer install --no-dev --no-interaction --optimize-autoloader
 RUN php artisan storage:link || true && \
     chmod -R 777 storage bootstrap/cache
 
-EXPOSE 8080
+EXPOSE 10000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=60s \
     CMD php -r "echo 'OK';" || exit 1
 
-# Start server (no migration for now)
+# Start server - use PORT from Render environment
 CMD php artisan config:clear && \
-    php artisan serve --host=0.0.0.0 --port=8080
+    php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
