@@ -25,13 +25,12 @@ COPY . .
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Cache Laravel
-RUN php artisan config:cache && \
-    php artisan route:cache && \
-    php artisan view:cache
+# Cache Laravel - skip if env not ready
+RUN php artisan config:clear || true
 
 # Expose port
 EXPOSE 8080
 
 # Start Laravel - temporarily without migration to debug
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
+# Use explicit port 8080 for Render
+CMD php artisan serve --host=0.0.0.0 --port=8080
