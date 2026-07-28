@@ -33,5 +33,5 @@ RUN php artisan config:cache && \
 # Expose port
 EXPOSE 8080
 
-# Start Laravel with migrations
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT
+# Start Laravel - skip problematic migration
+CMD php artisan serve --host=0.0.0.0 --port=$PORT
