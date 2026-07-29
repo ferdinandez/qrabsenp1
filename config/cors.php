@@ -3,10 +3,10 @@
 return [
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
     'allowed_methods' => ['*'],
-    'allowed_origins' => ['*'],  // Allow all origins
+    'allowed_origins' => ['https://attendx.my.id', 'https://www.attendx.my.id', '*'],
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],
     'max_age' => 0,
-    'supports_credentials' => false,  // Changed to false to avoid CORS issues
+    'supports_credentials' => false,
 ];
