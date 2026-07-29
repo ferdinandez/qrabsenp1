@@ -30,9 +30,10 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=60s \
     CMD php -r "echo 'OK';" || exit 1
 
 # Start server - use PORT from Render environment
-# Clear all cache and use fresh config from env
+# Clear all cache, run migrations, then start
 CMD php artisan config:clear && \
     php artisan cache:clear && \
     php artisan route:clear && \
     php artisan view:clear && \
+    php artisan migrate --force && \
     php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
