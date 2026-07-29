@@ -1,31 +1,11 @@
 {
     "version": 2,
-    "name": "attendx-frontend",
-    "builds": [
-        {
-            "src": "**/*.php",
-            "use": "@vercel/php"
+    "functions": {
+        "api/**/*.php": {
+            "runtime": "vercel-php@0.7.1"
         },
-        {
-            "src": "assets/**",
-            "use": "@vercel/static"
+        "*.php": {
+            "runtime": "vercel-php@0.7.1"
         }
-    ],
-    "routes": [
-        {
-            "src": "/assets/(.*)",
-            "dest": "/assets/$1"
-        },
-        {
-            "src": "/(.*\\.php)",
-            "dest": "/$1"
-        },
-        {
-            "src": "/",
-            "dest": "/dashboard.php"
-        }
-    ],
-    "env": {
-        "API_URL": "https://attendx-t6ow.onrender.com/api"
     }
 }
