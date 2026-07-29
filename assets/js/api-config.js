@@ -1,25 +1,36 @@
 /**
- * API Configuration for Production (Railway Direct Connection)
- * Browser langsung connect ke Railway API (no proxy needed)
+ * API Configuration for Vercel Deployment
+ * No proxy needed - direct to Render API!
  */
 
-// Direct connection ke Railway API
+// NO PROXY needed on Vercel!
 const USE_PROXY = false;
 
-// Railway API URL
-const API_BASE_URL = 'https://attendx-production-00d1.up.railway.app/api';
+// Direct to Render API
+const API_BASE_URL = 'https://attendx-t6ow.onrender.com/api';
+
+console.log('🚀 VERCEL MODE - Direct API calls');
+console.log('API_BASE_URL:', API_BASE_URL);
 
 /**
- * Helper function untuk fetch API langsung
+ * Helper function untuk fetch API
  */
 async function apiRequest(endpoint, options = {}) {
-    const url = `${API_BASE_URL}${endpoint}`;
+    // Remove leading slash if present
+    endpoint = endpoint.replace(/^\//, '');
+
+    const url = `${API_BASE_URL}/${endpoint}`;
+
+    console.log('🌐 API Request:', url);
+
     return fetch(url, options);
 }
 
-// Export untuk digunakan di halaman lain
+// Export
 window.API_CONFIG = {
     USE_PROXY,
     API_BASE_URL,
     apiRequest
 };
+
+console.log('✅ API_CONFIG ready (Vercel mode)');

@@ -354,7 +354,7 @@ $username = $_SESSION['username'] ?? 'Admin';
     </div>
     <script>
         // Use global API_CONFIG from api-config.js
-        const API_URL = window.API_CONFIG ? window.API_CONFIG.API_BASE_URL : 'https://attendx-production-00d1.up.railway.app/api';
+        const API_URL = window.API_CONFIG ? window.API_CONFIG.API_BASE_URL : 'https://attendx-t6ow.onrender.com/api';
         const token = '<?= $_SESSION['token'] ?>';
 
         async function loadUsers() {

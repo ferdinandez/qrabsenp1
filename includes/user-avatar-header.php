@@ -38,7 +38,6 @@ $header_user_id = $_SESSION['user_id'] ?? null;
 
 <script>
 (function() {
-    const API_URL = window.API_CONFIG ? window.API_CONFIG.API_BASE_URL : 'https://attendx-production-00d1.up.railway.app/api';
     const token = '<?= $_SESSION['token'] ?? '' ?>';
     
     async function loadHeaderAvatar() {
@@ -55,7 +54,15 @@ $header_user_id = $_SESSION['user_id'] ?? null;
         }
         
         try {
-            const res = await fetch(`${API_URL}/profile`, {
+            // Use API_CONFIG if available, otherwise skip (not critical)
+            if (!window.API_CONFIG || !window.API_CONFIG.apiRequest) {
+                console.warn('API_CONFIG not loaded yet, skipping header avatar');
+                loading.classList.add('hidden');
+                avatarInitial.classList.remove('hidden');
+                return;
+            }
+            
+            const res = await API_CONFIG.apiRequest('/profile', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
