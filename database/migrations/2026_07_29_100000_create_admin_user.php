@@ -12,7 +12,7 @@ return new class extends Migration
     {
         // Create admin user if not exists
         User::firstOrCreate(
-            ['email' => 'admin@attendancex.com'],
+            ['email' => 'attendx9@gmail.com'],
             [
                 'name' => 'Administrator',
                 'password' => Hash::make('admin123'),
@@ -24,6 +24,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        User::where('email', 'admin@attendancex.com')->delete();
+        User::where('email', 'attendx9@gmail.com')->delete();
     }
 };
