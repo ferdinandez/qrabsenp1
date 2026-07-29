@@ -15,11 +15,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Admin user sudah dibuat via migration 2026_07_29_100000_create_admin_user.php
+        // Tidak perlu seeder tambahan
     }
 }
